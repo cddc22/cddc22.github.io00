@@ -1,0 +1,156 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="author" content="cx,cxlg66you@gmail"><title>如何卸载阿里云&腾讯云官方的监控软件服务？ · 随心小记</title><meta name="description" content="&amp;nbsp;
+国内用户数比较大云服务商还属于阿里云和腾讯云。相对来说阿里云的相关产品最完善了！
+当然阿里云的云服务也算是ZF重点监控对象。其中阿里提供了云盾（安骑士）监控服务，虽然功能是好的，但是&amp;#8230;&amp;#8230;
+使用阿里云ECS（尤其是海外的）之前得先把监控软件干掉，要不然啥都给阿里云"><meta name="keywords" content="android,Linux"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="renderer" content="webkit"><link rel="short icon" href="/images/favicon.png" type="image/x-icon"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/blog_basic.css"><link rel="stylesheet" href="/css/font-awesome.min.css"><link rel="alternate" type="application/atom+xml" title="ATOM 1.0" href="/atom.xml"></head><body><div class="sidebar animated fadeInDown"><div class="logo-title"><div class="title"><img src="/images/logo@2x.png" style="width:127px;"><h3 title=""><a href="/">随心小记</a></h3><div class="description"><p>Nothing lasts forever.</p></div></div></div><ul class="social-links"></ul><div class="footer"><a target="_blank" href="/"><span>Theme by </span></a><a href="/"> CaiCai </a><span>&</span><a href="https://github.com/Ben02/hexo-theme-Anatole"> Ben</a><div class="by_farbox"><a href="https:/freenom.com/" target="_blank">Proudly freenom&#65281;</a></div></div></div><div class="main"><div class="page-top animated fadeInDown"><div class="nav"><li><a href="/">首页</a></li><li><a href="/about">关于</a></li><li><a href="/archives">归档</a></li><li><a href="/links">友链</a></li></div><div class="information"><div class="back_btn"><li><a onclick="window.history.go(-1)" class="fa fa-chevron-left"> </a></li></div><div class="avatar"><img src="/images/favicon.png"></div></div></div><div class="autopagerize_page_element"><div class="content"><div class="post-page"><div class="post animated fadeInDown"><div class="post-title"><h3><a>如何卸载阿里云&amp;腾讯云官方的监控软件服务？</a></h3></div><div class="post-content"><p><img src="https://ws1.sinaimg.cn/large/7efa749fly1fjh7vmyibfj209305jwef.jpg" alt="如何卸载阿里云&amp;腾讯云官方的监控软件服务？"></p>
+<p>&nbsp;</p>
+<p>国内用户数比较大云服务商还属于阿里云和腾讯云。相对来说阿里云的相关产品最完善了！</p>
+<p>当然阿里云的云服务也算是ZF重点监控对象。其中阿里提供了云盾（安骑士）监控服务，虽然功能是好的，但是&#8230;&#8230;</p>
+<p>使用阿里云ECS（尤其是海外的）之前得先把监控软件干掉，要不然啥都给阿里云监控了，一点隐私都没了。博主的女装照被爆出去可不好啦~~~</p>
+<p>下面转载一篇卸载过程的日志，以后用得上。</p>
+<p>&nbsp;</p>
+<h2 id="卸载云盾（安骑士）"><a href="#卸载云盾（安骑士）" class="headerlink" title="卸载云盾（安骑士）"></a>卸载云盾（安骑士）</h2><pre class="crayon-plain-tag">curl -sSL http://update.aegis.aliyun.com/download/quartz_uninstall.sh | sudo bash
+
+sudo rm -rf /usr/local/aegis
+
+sudo rm /usr/sbin/aliyun-service
+
+sudo rm /lib/systemd/system/aliyun.service</pre>
+
+<p>代码备份↓↓↓</p>
+<pre class="crayon-plain-tag">bash
+#!/bin/bash
+
+#check linux Gentoo os 
+var=`lsb_release -a | grep Gentoo`
+if [ -z "${var}" ]; then 
+    var=`cat /etc/issue | grep Gentoo`
+fi
+
+if [ -d "/etc/runlevels/default" -a -n "${var}" ]; then
+    LINUX_RELEASE="GENTOO"
+else
+    LINUX_RELEASE="OTHER"
+fi
+
+stop_aegis(){
+    killall -9 aegis_cli &gt;/dev/null 2&gt;&amp;1
+    killall -9 aegis_update &gt;/dev/null 2&gt;&amp;1
+    killall -9 aegis_cli &gt;/dev/null 2&gt;&amp;1
+    printf "%-40s %40s\n" "Stopping aegis" "[  OK  ]"
+}
+
+stop_quartz(){
+    killall -9 aegis_quartz &gt;/dev/null 2&gt;&amp;1
+        printf "%-40s %40s\n" "Stopping quartz" "[  OK  ]"
+}
+
+remove_aegis(){
+if [ -d /usr/local/aegis ];then
+    rm -rf /usr/local/aegis/aegis_client
+    rm -rf /usr/local/aegis/aegis_update
+fi
+}
+
+remove_quartz(){
+if [ -d /usr/local/aegis ];then
+    rm -rf /usr/local/aegis/aegis_quartz
+fi
+}
+
+uninstall_service() {
+
+   if [ -f "/etc/init.d/aegis" ]; then
+        /etc/init.d/aegis stop  &gt;/dev/null 2&gt;&amp;1
+        rm -f /etc/init.d/aegis 
+   fi
+
+    if [ $LINUX_RELEASE = "GENTOO" ]; then
+        rc-update del aegis default 2&gt;/dev/null
+        if [ -f "/etc/runlevels/default/aegis" ]; then
+            rm -f "/etc/runlevels/default/aegis" &gt;/dev/null 2&gt;&amp;1;
+        fi
+    elif [ -f /etc/init.d/aegis ]; then
+         /etc/init.d/aegis  uninstall
+        for ((var=2; var&lt;=5; var++)) do
+            if [ -d "/etc/rc${var}.d/" ];then
+                 rm -f "/etc/rc${var}.d/S80aegis"
+            elif [ -d "/etc/rc.d/rc${var}.d" ];then
+                rm -f "/etc/rc.d/rc${var}.d/S80aegis"
+            fi
+        done
+    fi
+
+}
+
+stop_aegis
+stop_quartz
+uninstall_service
+remove_aegis
+printf "%-40s %40s\n" "Uninstalling aegis"  "[  OK  ]"
+
+remove_quartz
+printf "%-40s %40s\n" "Uninstalling aegis_quartz"  "[  OK  ]"</pre>
+
+<p>&nbsp;</p>
+<p>或者用网友简单粗暴版本：</p>
+<pre class="crayon-plain-tag">#!/bin/bash 
+rm -rf /usr/local/aegis 
+for A in $(ps aux | grep Ali | grep -v grep | awk '{print $2}') 
+do 
+  kill -9 $A; 
+done</pre>
+
+<p>&nbsp;</p>
+<h2 id="屏蔽云盾-IP"><a href="#屏蔽云盾-IP" class="headerlink" title="屏蔽云盾 IP"></a>屏蔽云盾 IP</h2><p>而后检查服务器记录时发现一堆 <pre class="crayon-plain-tag">Alibaba.Security.Heimdall</pre> 的访问记录。网上查询发现是云盾。</p>
+<p>根据<a href="/go/index.html?u=https://www.cmsky.com/wp-content/themes/begin/inc/go.php?url=https://help.aliyun.com/knowledge_detail/37436.html">官方介绍</a>：</p>
+<blockquote>
+<p>云盾会通过公网模拟黑客入侵攻击，进行安全扫描。所以服务器有安全防护时，需要对云盾扫描ip进行放行。</p>
+</blockquote>
+<p>赶快屏蔽！</p>
+<p>此处使用 UFW，<pre class="crayon-plain-tag">iptables</pre> 用户请自己找一下添加方法。注意：如果已有接受 80 端口之类的规则，新增的拒绝 IP 规则在其后将不会生效。所以要在 <pre class="crayon-plain-tag">/etc/ufw/before.rules</pre> 设置。</p>
+<pre class="crayon-plain-tag">sudo nano</pre> 编辑此文件并找到 <pre class="crayon-plain-tag"># End required lines</pre>，在其后添加：
+<pre class="crayon-plain-tag"># Block Ali Yun Dun  https://help.aliyun.com/knowledge_detail/37436.html
+
+-A ufw-before-input -s 140.205.201.0/28 -j DROP
+-A ufw-before-input -s 140.205.201.16/29 -j DROP
+-A ufw-before-input -s 140.205.201.32/28 -j DROP
+-A ufw-before-input -s 140.205.225.192/29 -j DROP
+-A ufw-before-input -s 140.205.225.200/30 -j DROP
+-A ufw-before-input -s 140.205.225.184/29 -j DROP
+-A ufw-before-input -s 140.205.225.183/32 -j DROP
+-A ufw-before-input -s 140.205.225.206/32 -j DROP
+-A ufw-before-input -s 140.205.225.205/32 -j DROP
+-A ufw-before-input -s 140.205.225.195/32 -j DROP
+-A ufw-before-input -s 140.205.225.204/32 -j DROP</pre>
+
+<p>保存后运行 <pre class="crayon-plain-tag">sudo ufw reload</pre>。完毕！</p>
+<p>&nbsp;</p>
+<h2 id="腾讯云解决方案"><a href="#腾讯云解决方案" class="headerlink" title="腾讯云解决方案"></a>腾讯云解决方案</h2><p>据说腾讯云也有类似问题：转：</p>
+<pre class="crayon-plain-tag">#!/bin/bash
+#fuck tx process
+rm -rf /usr/local/sa
+rm -rf /usr/local/agenttools
+rm -rf /usr/local/qcloud
+process=(sap100 secu-tcs-agent sgagent64 barad_agent agent agentPlugInD pvdriver )
+for i in ${process[@]}
+do
+  for A in $(ps aux | grep $i | grep -v grep | awk '{print $2}')
+  do
+    kill -9 $A
+  done
+done
+
+chkconfig --level 35 postfix off
+service postfix stop
+echo ''&gt;/var/spool/cron/root
+echo '#!/bin/bash' &gt;/etc/rc.local</pre>
+
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p><em>文章转载：</em></p>
+<p><em><a href="https://www.cmsky.com/uninstall-aliyun-monitoring" target="_blank" rel="external">https://www.cmsky.com/uninstall-aliyun-monitoring</a></em></p>
+<p><em><a href="https://blog.whe.me/post/uninstall-aliyun-monitoring.html" target="_blank" rel="external">https://blog.whe.me/post/uninstall-aliyun-monitoring.html</a></em></p>
+<p><em>参考文献：</em></p>
+<p><em><a href="https://www.v2ex.com/t/217931" target="_blank" rel="external">https://www.v2ex.com/t/217931</a></em></p>
+<p>_<a href="https://help.aliyun.com/knowledge_detail/40477.html" target="_blank" rel="external">https://help.aliyun.com/knowledge_detail/40477.html</a>_</p>
+</div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2017-09-12</span><i class="fa fa-tag"></i><a href="/tags/教程资源/" title="教程资源" class="tag">教程资源 </a><a href="/tags/删除腾讯云监控/" title="删除腾讯云监控" class="tag">删除腾讯云监控 </a><a href="/tags/删除阿里云监控/" title="删除阿里云监控" class="tag">删除阿里云监控 </a><a href="/tags/卸载阿里云安骑士/" title="卸载阿里云安骑士" class="tag">卸载阿里云安骑士 </a></div></div></div></div><div class="share"><div class="evernote"><a href="javascript:(function(){EN_CLIP_HOST='http://www.evernote.com';try{var%20x=document.createElement('SCRIPT');x.type='text/javascript';x.src=EN_CLIP_HOST+'/public/bookmarkClipper.js?'+(new%20Date().getTime()/100000);document.getElementsByTagName('head')[0].appendChild(x);}catch(e){location.href=EN_CLIP_HOST+'/clip.action?url='+encodeURIComponent(location.href)+'&amp;title='+encodeURIComponent(document.title);}})();" ref="nofollow" target="_blank" class="fa fa-bookmark"></a></div><div class="weibo"><a href="javascript:void((function(s,d,e){try{}catch(e){}var f='http://service.weibo.com/share/share.php?',u=d.location.href,p=['url=',e(u),'&amp;title=',e(d.title),'&amp;appkey=2924220432'].join('');function a(){if(!window.open([f,p].join(''),'mb',['toolbar=0,status=0,resizable=1,width=620,height=450,left=',(s.width-620)/2,',top=',(s.height-450)/2].join('')))u.href=[f,p].join('');};if(/Firefox/.test(navigator.userAgent)){setTimeout(a,0)}else{a()}})(screen,document,encodeURIComponent));" class="fa fa-weibo"></a></div><div class="twitter"><a href="http://twitter.com/home?status=,http://cxdl.ml/2017/09/12/如何卸载阿里云-腾讯云官方的监控软件服务？/,随心小记,如何卸载阿里云&amp;腾讯云官方的监控软件服务？,;" class="fa fa-twitter"></a></div></div><div class="pagination"><ul class="clearfix"><li class="pre pagbuttons"><a role="navigation" href="/2017/09/12/『推荐』《军舰岛-군함도》韩国抗日题材电影，非“神剧”/" title="『推荐』《军舰岛 군함도》韩国抗日题材电影，非“神剧”" class="btn">上一篇</a></li></ul></div></div></div></div></div><script src="/js/jquery.js"></script><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script></body></html>
